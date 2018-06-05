@@ -7,6 +7,7 @@ function restore {
     --host "$MONGO_HOST"
     --username "$MONGO_USERNAME"
     --password "$MONGO_PASSWORD"
+    --db "$MONGO_DB"
     --drop
   )
   if [[ -v MONGO_SSL ]]; then
