@@ -3,11 +3,31 @@
 function restore {
   aws s3api get-object --bucket $S3BUCKET --key $FILE /backup/$FILE
   tar -zxvf /backup/$FILE -C /backup
-  mongorestore -h $MONGO_HOST --ssl \
-    --username $MONGO_USERNAME --password $MONGO_PASSWORD \
-    --authenticationDatabase admin \
+  args=(
+    --host "$MONGO_HOST"
+    --username "$MONGO_USERNAME"
+    --password "$MONGO_PASSWORD"
     --drop
-    dump/
+  )
+  if [[ -v MONGO_SSL ]]; then
+      args+=(--ssl)
+  fi
+  if [[ -v MONGO_AUTHENTICATION_DB ]]; then
+      args+=(--authenticationDatabase "$MONGO_AUTHENTICATION_DB")
+  fi
+  if [[ -v MONGO_NSINCLUDE ]]; then
+      args+=(--nsInclude "$MONGO_NSINCLUDE")
+  fi
+  if [[ -v MONGO_NSEXCLUDE ]]; then
+      args+=(--nsExclude "$MONGO_NSEXCLUDE")
+  fi
+  if [[ -v MONGO_NSFROM ]]; then
+      args+=(--nsFrom "$MONGO_NSFROM")
+  fi
+  if [[ -v MONGO_NSTO ]]; then
+      args+=(--nsTo "$MONGO_NSTO")
+  fi
+  mongorestore "${args[@]}" dump/
   echo "Cleaning up..."
   rm -rf dump/ /backup/$FILE
 }
